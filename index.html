@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEE YOUNGJU — Brand Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:       #F5F4F0;
+      --surface:  #EBEBEA;
+      --fg:       #0A0A0A;
+      --fg-muted: #555;
+      --border:   #D0CFCB;
+      --accent:   #FF3B00;
+      --blue:     #5547FF;
+    }
+    [data-theme="dark"] {
+      --bg:       #0A0A0A;
+      --surface:  #141414;
+      --fg:       #F5F4F0;
+      --fg-muted: #888;
+      --border:   #2A2A2A;
+      --accent:   #FF3B00;
+      --blue:     #7B6FFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+      transition: background 0.3s, color 0.3s;
+      cursor: none;
+    }
+
+    /* ─── CURSOR ─── */
+    .cursor {
+      position: fixed; width: 14px; height: 14px;
+      background: var(--accent); pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      clip-path: polygon(0 0,75% 0,100% 25%,100% 100%,25% 100%,0 75%);
+      transition: width .1s, height .1s, clip-path .15s;
+    }
+    .cursor.painting {
+      width: 20px; height: 20px;
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    }
+    .cursor-dot {
+      position: fixed; width: 4px; height: 4px;
+      background: var(--fg); pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      transition: background .3s, border-color .3s;
+    }
+    .nav-logo {
+      font-family: 'Press Start 2P', monospace; font-size: 11px;
+      letter-spacing: .05em; color: var(--fg); text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 32px; align-items: center; list-style: none; }
+    .nav-links a {
+      color: var(--fg-muted); text-decoration: none; font-size: 13px;
+      font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+      transition: color .2s; cursor: none;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .theme-toggle {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      background: transparent; cursor: none; display: flex;
+      align-items: center; justify-content: center; transition: border-color .2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+    .theme-icon {
+      width: 16px; height: 16px; background: var(--fg);
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+      transition: background .3s;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    #heroCanvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      z-index: 0; display: block;
+    }
+
+    /* paint toolbar */
+    .paint-toolbar {
+      position: absolute; top: 88px; right: 48px; z-index: 10;
+      display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+    }
+    .toolbar-label {
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+      letter-spacing: .1em; color: var(--fg-muted); margin-bottom: 4px;
+      text-align: right;
+    }
+    .color-row { display: flex; gap: 6px; align-items: center; }
+    .color-swatch {
+      width: 24px; height: 24px; border: 2px solid transparent;
+      cursor: none; transition: transform .1s, border-color .1s;
+      image-rendering: pixelated;
+    }
+    .color-swatch:hover { transform: scale(1.2); }
+    .color-swatch.active { border-color: var(--fg); transform: scale(1.2); }
+    .color-swatch.eraser {
+      background: var(--bg) !important;
+      border: 2px dashed var(--border) !important;
+      font-family: 'Press Start 2P', monospace; font-size: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--fg-muted);
+    }
+    .toolbar-btn {
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+      letter-spacing: .06em; padding: 6px 10px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--fg-muted); cursor: none; transition: all .2s;
+    }
+    .toolbar-btn:hover { border-color: var(--accent); color: var(--accent); }
+    /* brush size */
+    .size-row { display: flex; gap: 4px; align-items: center; }
+    .size-btn {
+      width: 28px; height: 28px; border: 1px solid var(--border);
+      background: transparent; cursor: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s; padding: 0;
+    }
+    .size-btn:hover { border-color: var(--accent); }
+    .size-btn.active { background: var(--fg); border-color: var(--fg); }
+    .sq { background: var(--fg-muted); display: block; }
+    .size-btn.active .sq { background: var(--bg); }
+
+    /* hero status bar */
+    .hero-status {
+      position: absolute; top: 88px; left: 48px; z-index: 10;
+      display: flex; align-items: center; gap: 24px;
+    }
+    .hero-label {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      letter-spacing: .15em; color: var(--accent);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .blink-dot {
+      width: 8px; height: 8px; background: var(--accent);
+      animation: blink 1.2s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .hero-coords {
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+      color: var(--fg-muted); letter-spacing: .1em;
+    }
+    .paint-hint-text {
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+      color: var(--fg-muted); letter-spacing: .08em; opacity: .6;
+    }
+    .paint-hint-text span { color: var(--accent); }
+
+    /* floating invite message */
+    .canvas-invite {
+      position: absolute; z-index: 4;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      animation: invite-float 3s ease-in-out infinite;
+    }
+    @keyframes invite-float {
+      0%,100% { transform: translate(-50%,-50%) translateY(0); }
+      50%      { transform: translate(-50%,-50%) translateY(-8px); }
+    }
+    .canvas-invite-main {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(9px, 1.3vw, 13px);
+      color: var(--fg);
+      opacity: .55;
+      letter-spacing: .12em;
+      line-height: 2.2;
+      display: block;
+    }
+    .canvas-invite-main .acc { color: var(--accent); opacity: 1; }
+    .canvas-invite-arrow {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px; color: var(--accent);
+      opacity: .5; display: block; margin-top: 6px;
+      animation: blink 1.2s step-end infinite;
+    }
+    /* fade out once user starts painting */
+    .canvas-invite.hidden {
+      opacity: 0; transition: opacity .8s;
+    }
+
+    /* hero main content */
+    .hero-content {
+      position: relative; z-index: 5;
+      margin-top: auto; padding: 0 48px 56px;
+      pointer-events: none; /* let clicks pass through to canvas */
+    }
+    /* restore pointer events only on interactive elements */
+    .hero-content a,
+    .hero-content button { pointer-events: auto; }
+    .hero-title-small {
+      font-family: 'Press Start 2P', monospace; font-size: 9px;
+      letter-spacing: .2em; color: var(--fg-muted); margin-bottom: 16px;
+    }
+    .hero-title-big {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(28px, 5.5vw, 80px);
+      line-height: 1.25; color: var(--fg); letter-spacing: -.02em;
+    }
+    .hero-title-big .acc { color: var(--accent); }
+    /* glitch */
+    .glitch { position: relative; display: inline-block; }
+    .glitch::before, .glitch::after {
+      content: attr(data-text); position: absolute;
+      left: 0; top: 0; opacity: 0;
+    }
+    .glitch::before { color: var(--accent); animation: ga 6s infinite 3s; }
+    .glitch::after  { color: var(--blue);   animation: gb 6s infinite 3s; }
+    @keyframes ga {
+      0%,93%,100%{opacity:0;transform:none}
+      94%{opacity:.8;transform:translate(-4px,1px) skewX(-3deg)}
+      97%{opacity:.4;transform:translate(3px,-1px)}
+    }
+    @keyframes gb {
+      0%,93%,100%{opacity:0;transform:none}
+      94%{opacity:.5;transform:translate(4px,0)}
+      97%{opacity:.3;transform:translate(-2px,1px)}
+    }
+
+    .hero-bottom {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: end; gap: 40px; margin-top: 40px;
+      padding-top: 28px; border-top: 1px solid var(--border);
+    }
+    .hero-desc {
+      font-family: 'Noto Sans KR', sans-serif; font-size: 15px;
+      font-weight: 300; color: var(--fg-muted); line-height: 1.9;
+    }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 24px; font-family: 'Press Start 2P', monospace;
+      font-size: 8px; letter-spacing: .05em; text-decoration: none;
+      cursor: none; transition: all .2s;
+    }
+    .btn-primary { background: var(--fg); color: var(--bg); }
+    .btn-primary:hover { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-stats { display: flex; gap: 28px; justify-content: flex-end; }
+    .stat { text-align: right; }
+    .stat-num {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(16px, 2.2vw, 26px);
+      color: var(--fg); display: block; line-height: 1; margin-bottom: 6px;
+    }
+    .stat-label { font-size: 10px; letter-spacing: .1em; color: var(--fg-muted); text-transform: uppercase; }
+
+    /* scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 28px; right: 48px; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .scroll-hint-text {
+      font-family: 'Press Start 2P', monospace; font-size: 6px;
+      letter-spacing: .1em; color: var(--fg-muted); writing-mode: vertical-rl;
+    }
+    .scroll-line { width: 1px; height: 40px; background: var(--border); position: relative; overflow: hidden; }
+    .scroll-line::after {
+      content:''; position: absolute; top: -100%; width: 100%; height: 100%;
+      background: var(--accent); animation: sdown 1.6s ease-in-out infinite;
+    }
+    @keyframes sdown { 0%{top:-100%} 100%{top:200%} }
+
+    /* ticker bg */
+    .hero-ticker {
+      position: absolute; top: 50%; left: 0; right: 0;
+      transform: translateY(-50%); overflow: hidden;
+      pointer-events: none; z-index: 1; opacity: .03;
+    }
+    .hero-ticker-track { display: flex; animation: tick 22s linear infinite; width: max-content; }
+    .hero-ticker-item {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(60px, 10vw, 120px);
+      white-space: nowrap; padding: 0 48px; color: var(--fg); line-height: 1;
+    }
+    @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+
+    /* ─── MARQUEE ─── */
+    .marquee-strip {
+      overflow: hidden; padding: 14px 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .marquee-track { display: flex; animation: marquee 18s linear infinite; width: max-content; }
+    .marquee-item {
+      display: flex; align-items: center; gap: 20px; padding: 0 36px;
+      font-family: 'Press Start 2P', monospace; font-size: 9px;
+      letter-spacing: .1em; color: var(--fg-muted); white-space: nowrap;
+    }
+    .marquee-dot { width: 6px; height: 6px; background: var(--accent); flex-shrink: 0; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ─── PHILOSOPHY ─── */
+    .philosophy { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      letter-spacing: .2em; color: var(--accent); text-transform: uppercase;
+      margin-bottom: 48px; display: flex; align-items: center; gap: 16px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .philosophy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .phil-card {
+      background: var(--surface); padding: 48px 40px;
+      position: relative; overflow: hidden;
+    }
+    .phil-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%; background: var(--accent);
+    }
+    .phil-num {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      color: var(--accent); margin-bottom: 20px; opacity: .6;
+    }
+    .phil-text {
+      font-family: 'Noto Sans KR', sans-serif; font-size: 19px;
+      font-weight: 300; line-height: 1.9; color: var(--fg);
+    }
+    .phil-text strong { font-weight: 700; }
+    .phil-deco { position: absolute; bottom: 20px; right: 20px; opacity: .1; }
+
+    /* ─── WORK ─── */
+    .work { padding: 60px 48px 100px; max-width: 1200px; margin: 0 auto; }
+    .work-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; margin-bottom: 28px;
+    }
+    /* filter tabs */
+    .work-filters {
+      display: flex; gap: 2px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      letter-spacing: .1em; padding: 10px 18px;
+      background: var(--surface); border: 1px solid transparent;
+      color: var(--fg-muted); cursor: none; transition: all .2s;
+    }
+    .filter-btn:hover { color: var(--fg); border-color: var(--border); }
+    .filter-btn.active {
+      background: var(--fg); color: var(--bg); border-color: var(--fg);
+    }
+    /* grid */
+    .work-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; }
+    /* filtered view → uniform 4-col spans (3 per row) */
+    .work-grid.filtered .work-item { grid-column: span 4 !important; }
+    .work-item {
+      background: var(--surface); overflow: hidden;
+      position: relative; cursor: none;
+      transition: opacity .3s, transform .3s;
+    }
+    .work-item.hidden { display: none; }
+    .work-item:hover .work-overlay { opacity: 1; }
+    .work-item:hover .work-img { transform: scale(1.04); }
+    .work-item.c8 { grid-column: span 8; }
+    .work-item.c4 { grid-column: span 4; }
+    .work-item.c6 { grid-column: span 6; }
+    .work-item.c5 { grid-column: span 5; }
+    .work-item.c7 { grid-column: span 7; }
+    .work-img {
+      width: 100%; object-fit: cover; display: block;
+      transition: transform .5s ease;
+    }
+    .work-ph {
+      width: 100%; display: flex; align-items: center;
+      justify-content: center; flex-direction: column; gap: 12px;
+      color: var(--fg-muted); font-family: 'Press Start 2P', monospace;
+      font-size: 7px; letter-spacing: .1em;
+      border: 1px dashed var(--border); transition: border-color .3s;
+      background: var(--surface);
+    }
+    .work-item:hover .work-ph { border-color: var(--accent); }
+    .ph-tall { aspect-ratio: 4/5; }
+    .ph-wide { aspect-ratio: 16/9; }
+    .ph-sq   { aspect-ratio: 1/1; }
+    .ph-rect { aspect-ratio: 3/2; }
+    .work-overlay {
+      position: absolute; inset: 0; background: var(--fg);
+      opacity: 0; transition: opacity .3s;
+      display: flex; align-items: flex-end; padding: 20px;
+    }
+    .work-info { color: var(--bg); }
+    .work-tag {
+      font-family: 'Press Start 2P', monospace; font-size: 6px;
+      letter-spacing: .1em; color: var(--accent); margin-bottom: 6px; display: block;
+    }
+    .work-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
+    .work-sub  { font-size: 12px; opacity: .6; margin-top: 4px; font-family: 'Noto Sans KR', sans-serif; }
+
+    /* ─── PIXEL DIVIDER ─── */
+    .pixel-div {
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 0; gap: 4px;
+    }
+    .pixel-div .d { width: 6px; height: 6px; background: var(--border); }
+    .pixel-div .d:nth-child(4) { background: var(--accent); }
+
+    /* ─── ABOUT ─── */
+    .about {
+      padding: 60px 48px 100px; max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: start;
+    }
+    .about-skills { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 36px; }
+    .skill-chip {
+      background: var(--surface); padding: 16px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 500; letter-spacing: .04em;
+      border-left: 3px solid transparent; transition: border-color .2s;
+    }
+    .skill-chip:hover { border-left-color: var(--accent); }
+    .skill-dot { width: 5px; height: 5px; background: var(--accent); flex-shrink: 0; }
+    .about-heading {
+      font-family: 'Press Start 2P', monospace; font-size: 18px;
+      line-height: 1.7; margin-bottom: 28px; color: var(--fg);
+    }
+    .about-body {
+      font-family: 'Noto Sans KR', sans-serif; font-size: 16px;
+      font-weight: 300; line-height: 2; color: var(--fg-muted);
+    }
+
+    /* ─── CONTACT ─── */
+    .contact {
+      background: var(--fg); color: var(--bg);
+      padding: 100px 48px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .contact::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .contact-inner { position: relative; z-index: 1; }
+    .contact-label {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      letter-spacing: .2em; color: var(--accent); margin-bottom: 28px;
+    }
+    .contact-heading {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(18px, 3vw, 36px);
+      line-height: 1.6; margin-bottom: 40px; color: var(--bg);
+    }
+    .contact-email {
+      display: inline-block; font-size: 20px; font-weight: 600;
+      color: var(--accent); text-decoration: none;
+      border-bottom: 2px solid transparent; transition: border-color .2s; cursor: none;
+    }
+    .contact-email:hover { border-bottom-color: var(--accent); }
+    .contact-socials {
+      margin-top: 40px; display: flex; justify-content: center; gap: 20px;
+    }
+    .social-btn {
+      padding: 10px 18px; border: 1px solid rgba(255,255,255,.2);
+      color: var(--bg); text-decoration: none;
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+      letter-spacing: .1em; transition: border-color .2s, color .2s; cursor: none;
+    }
+    .social-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--fg); border-top: 1px solid rgba(255,255,255,.08);
+      padding: 20px 48px; display: flex; justify-content: space-between;
+      align-items: center; font-size: 11px; letter-spacing: .08em; color: var(--fg-muted);
+    }
+    .footer-logo {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      color: var(--bg); opacity: .35;
+    }
+
+    /* ─── REVEAL ─── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s, transform .7s; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .hero-status { left: 24px; }
+      .paint-toolbar { right: 24px; top: 84px; }
+      .hero-content { padding: 0 24px 40px; }
+      .hero-title-big { font-size: clamp(24px, 9vw, 48px); }
+      .hero-bottom { grid-template-columns: 1fr; gap: 20px; }
+      .hero-stats { justify-content: flex-start; }
+      .scroll-hint { display: none; }
+      .philosophy-grid, .about { grid-template-columns: 1fr; }
+      .philosophy, .about, .work { padding: 60px 24px; }
+      .work-item.c8,.work-item.c4,.work-item.c6,.work-item.c5,.work-item.c7 { grid-column: span 12; }
+      .contact { padding: 70px 24px; }
+      footer { padding: 16px 24px; flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">L<span>.</span>EE</a>
+  <ul class="nav-links">
+    <li><a href="#work">WORK</a></li>
+    <li><a href="#about">ABOUT</a></li>
+    <li><a href="#contact">CONTACT</a></li>
+    <li>
+      <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+        <div class="theme-icon"></div>
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="heroSection">
+  <canvas id="heroCanvas"></canvas>
+
+  <!-- ticker bg -->
+  <div class="hero-ticker" aria-hidden="true">
+    <div class="hero-ticker-track">
+      <span class="hero-ticker-item">BRAND</span>
+      <span class="hero-ticker-item">PIXEL</span>
+      <span class="hero-ticker-item">DESIGN</span>
+      <span class="hero-ticker-item">STORY</span>
+      <span class="hero-ticker-item">BRAND</span>
+      <span class="hero-ticker-item">PIXEL</span>
+      <span class="hero-ticker-item">DESIGN</span>
+      <span class="hero-ticker-item">STORY</span>
+    </div>
+  </div>
+
+  <!-- status bar -->
+  <div class="hero-status">
+    <p class="hero-label"><span class="blink-dot"></span>BRAND DESIGNER</p>
+    <p class="hero-coords" id="heroCoords">X:000 Y:000</p>
+  </div>
+
+  <!-- floating invite -->
+  <div class="canvas-invite" id="canvasInvite">
+    <span class="canvas-invite-main">
+      <span class="acc">화면을</span> 눌러보세요!
+    </span>
+    <span class="canvas-invite-arrow">▼ ▼ ▼</span>
+  </div>
+
+  <!-- paint toolbar -->
+  <div class="paint-toolbar">
+    <p class="toolbar-label">// PAINT</p>
+    <div class="color-row">
+      <div class="color-swatch active" data-color="#FF3B00" style="background:#FF3B00" title="레드 오렌지"></div>
+      <div class="color-swatch" data-color="#5547FF" style="background:#5547FF" title="퍼플 블루"></div>
+      <div class="color-swatch" data-color="FG" style="background:#0A0A0A" title="블랙/화이트" id="fgSwatch"></div>
+      <div class="color-swatch eraser" data-color="ERASE" title="지우개">✕</div>
+    </div>
+    <p class="toolbar-label" style="margin-top:4px">// SIZE</p>
+    <div class="size-row">
+      <button class="size-btn active" data-size="1" title="1×1"><span class="sq" style="width:6px;height:6px"></span></button>
+      <button class="size-btn" data-size="2" title="2×2"><span class="sq" style="width:10px;height:10px"></span></button>
+      <button class="size-btn" data-size="4" title="4×4"><span class="sq" style="width:16px;height:16px"></span></button>
+      <button class="size-btn" data-size="10" title="10×10"><span class="sq" style="width:22px;height:22px"></span></button>
+    </div>
+    <button class="toolbar-btn" id="clearBtn" style="margin-top:4px">CLEAR</button>
+  </div>
+
+  <!-- scroll -->
+  <div class="scroll-hint">
+    <span class="scroll-hint-text">SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+
+  <!-- main content -->
+  <div class="hero-content">
+    <p class="hero-title-small">// LEE YOUNGJU · PORTFOLIO 2026</p>
+    <div class="hero-title-big">
+      <span class="glitch" data-text="BRAND">BRAND</span><br>
+      <span class="glitch acc" data-text="PIXEL">PIXEL</span><br>
+      <span class="glitch" data-text="STORY.">STORY.</span>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        사람의 경험에서<br>
+        브랜드의 가치를 피워내는<br>
+        디자이너 이영주입니다.
+      </p>
+      <div class="hero-cta">
+        <a href="#work" class="btn btn-primary">VIEW WORK →</a>
+        <a href="#contact" class="btn btn-ghost">CONTACT</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num" data-count="20">00</span>
+          <span class="stat-label">Projects</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" data-count="5">0</span>
+          <span class="stat-label">Years</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-track">
+    <div class="marquee-item"><div class="marquee-dot"></div>BRAND IDENTITY</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>PACKAGE DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>UX/UI DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>EDITORIAL</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>ILLUSTRATION</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>MOTION DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>ART DIRECTION</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>VISUAL DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>BRAND IDENTITY</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>PACKAGE DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>UX/UI DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>EDITORIAL</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>ILLUSTRATION</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>MOTION DESIGN</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>ART DIRECTION</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>VISUAL DESIGN</div>
+  </div>
+</div>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy" id="about">
+  <p class="section-label reveal">PHILOSOPHY</p>
+  <div class="philosophy-grid reveal">
+    <div class="phil-card">
+      <p class="phil-num">// 01</p>
+      <p class="phil-text">
+        모든 브랜드는 하나의 <strong>픽셀</strong>처럼<br>
+        작은 아이디어에서 시작됩니다.<br><br>
+        저는 그 작은 가능성을 발견하고,<br>
+        사람들의 경험 속에서<br>
+        하나의 브랜드로 완성합니다.
+      </p>
+      <div class="phil-deco">
+        <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect fill="currentColor" x="0" y="0" width="8" height="8"/>
+          <rect fill="currentColor" x="8" y="8" width="8" height="8"/>
+          <rect fill="currentColor" x="16" y="16" width="8" height="8"/>
+          <rect fill="currentColor" x="24" y="24" width="8" height="8"/>
+          <rect fill="currentColor" x="32" y="32" width="8" height="8"/>
+          <rect fill="currentColor" x="40" y="40" width="8" height="8"/>
+          <rect fill="currentColor" x="8" y="0" width="8" height="8"/>
+          <rect fill="currentColor" x="16" y="8" width="8" height="8"/>
+          <rect fill="currentColor" x="24" y="16" width="8" height="8"/>
+          <rect fill="currentColor" x="32" y="24" width="8" height="8"/>
+          <rect fill="currentColor" x="40" y="32" width="8" height="8"/>
+        </svg>
+      </div>
+    </div>
+    <div class="phil-card">
+      <p class="phil-num">// 02</p>
+      <p class="phil-text">
+        브랜드는 하나의 결과물이 아니라,<br>
+        <strong>수많은 경험의 조각</strong>이<br>
+        모여 만들어집니다.<br><br>
+        저는 그 조각 하나하나를<br>
+        정성껏 디자인합니다.
+      </p>
+      <div class="phil-deco">
+        <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect fill="currentColor" x="0" y="0" width="8" height="8"/>
+          <rect fill="currentColor" x="16" y="0" width="8" height="8"/>
+          <rect fill="currentColor" x="32" y="0" width="8" height="8"/>
+          <rect fill="currentColor" x="8" y="16" width="8" height="8"/>
+          <rect fill="currentColor" x="24" y="16" width="8" height="8"/>
+          <rect fill="currentColor" x="40" y="16" width="8" height="8"/>
+          <rect fill="currentColor" x="0" y="32" width="8" height="8"/>
+          <rect fill="currentColor" x="16" y="32" width="8" height="8"/>
+          <rect fill="currentColor" x="32" y="32" width="8" height="8"/>
+          <rect fill="currentColor" x="8" y="40" width="8" height="8"/>
+          <rect fill="currentColor" x="24" y="40" width="8" height="8"/>
+          <rect fill="currentColor" x="40" y="40" width="8" height="8"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="pixel-div"><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div></div>
+
+<!-- WORK -->
+<section class="work" id="work">
+  <div class="work-header reveal">
+    <p class="section-label" style="margin-bottom:0">SELECTED WORK</p>
+  </div>
+
+  <!-- category filter tabs -->
+  <div class="work-filters reveal">
+    <button class="filter-btn active" data-filter="all">ALL</button>
+    <button class="filter-btn" data-filter="branding">BRANDING</button>
+    <button class="filter-btn" data-filter="uxui">UX/UI</button>
+    <button class="filter-btn" data-filter="editorial">EDITORIAL</button>
+    <button class="filter-btn" data-filter="content">CONTENT</button>
+  </div>
+
+  <div class="work-grid reveal" id="workGrid">
+
+    <!-- BRANDING -->
+    <div class="work-item c8" data-category="branding">
+      <div class="work-ph ph-wide">
+        <svg width="28" height="20" viewBox="0 0 28 20" style="opacity:.35;image-rendering:pixelated;">
+          <rect fill="currentColor" x="0" y="6" width="28" height="8"/>
+          <rect fill="currentColor" x="6" y="0" width="4" height="20"/>
+          <rect fill="currentColor" x="18" y="0" width="4" height="20"/>
+        </svg>
+        작업물 이미지
+      </div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">BRANDING · PACKAGE</span>
+          <p class="work-name">외계인방앗간 [RE]</p>
+          <p class="work-sub">쌀 베이커리 카페 리브랜딩 · 푸드 캐리어 패키지</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="branding">
+      <div class="work-ph ph-wide">
+        <svg width="20" height="20" viewBox="0 0 20 20" style="opacity:.35;image-rendering:pixelated;">
+          <rect fill="currentColor" x="4" y="0" width="12" height="4"/>
+          <rect fill="currentColor" x="0" y="4" width="4" height="12"/>
+          <rect fill="currentColor" x="16" y="4" width="4" height="12"/>
+          <rect fill="currentColor" x="4" y="16" width="12" height="4"/>
+          <rect fill="currentColor" x="6" y="6" width="8" height="8"/>
+        </svg>
+        작업물 이미지
+      </div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">BRANDING</span>
+          <p class="work-name">인연 因緣 / #WITH</p>
+          <p class="work-sub">브랜딩 · 장신구 패키지 · 팝업스토어</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="branding">
+      <div class="work-ph ph-rect">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">PACKAGE DESIGN</span>
+          <p class="work-name">꾸운 김에</p>
+          <p class="work-sub">건강 어포스낵 패키지디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="branding">
+      <div class="work-ph ph-rect">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">PACKAGE DESIGN</span>
+          <p class="work-name">슈퍼말차 마이노멀</p>
+          <p class="work-sub">말차 음료 패키지 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="branding">
+      <div class="work-ph ph-rect">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">PACKAGE DESIGN</span>
+          <p class="work-name">만두 속 오징어순대</p>
+          <p class="work-sub">식품 패키지 디자인</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- UX/UI -->
+    <div class="work-item c6" data-category="uxui">
+      <div class="work-ph ph-wide">
+        <svg width="28" height="20" viewBox="0 0 28 20" style="opacity:.35;image-rendering:pixelated;">
+          <rect fill="currentColor" x="0" y="6" width="4" height="8"/>
+          <rect fill="currentColor" x="4" y="4" width="4" height="12"/>
+          <rect fill="currentColor" x="8" y="2" width="4" height="16"/>
+          <rect fill="currentColor" x="12" y="4" width="4" height="12"/>
+          <rect fill="currentColor" x="16" y="6" width="4" height="8"/>
+          <rect fill="currentColor" x="20" y="8" width="4" height="4"/>
+          <rect fill="currentColor" x="24" y="9" width="4" height="2"/>
+        </svg>
+        작업물 이미지
+      </div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">UX/UI · MOBILE APP</span>
+          <p class="work-name">PEWiM 퓨림</p>
+          <p class="work-sub">반려동물 행복 애플리케이션 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c6" data-category="uxui">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">UX/UI · MOBILE APP</span>
+          <p class="work-name">NOWW 나우</p>
+          <p class="work-sub">모바일 앱 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c6" data-category="uxui">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">UX/UI · MOBILE APP</span>
+          <p class="work-name">sai 사이</p>
+          <p class="work-sub">모바일 앱 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c6" data-category="uxui">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">WEB DESIGN</span>
+          <p class="work-name">정반</p>
+          <p class="work-sub">간편 반상 판매 건강 관리 웹사이트</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDITORIAL -->
+    <div class="work-item c8" data-category="editorial">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">EDITORIAL · BOOK</span>
+          <p class="work-name">세계무용사</p>
+          <p class="work-sub">무용의 역사를 담은 책 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="editorial">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">EDITORIAL · BOOK</span>
+          <p class="work-name">비행기 구조 교과서</p>
+          <p class="work-sub">항공기 구조 소책자 리디자인</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="work-item c6" data-category="content">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">MOTION · VIDEO</span>
+          <p class="work-name">Fe26 : REINFORCE</p>
+          <p class="work-sub">26기 졸업전시회 영상 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c6" data-category="content">
+      <div class="work-ph ph-wide">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">POSTER DESIGN</span>
+          <p class="work-name">뮤지컬 해밀턴 [홍보]</p>
+          <p class="work-sub">공연 홍보 포스터 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="content">
+      <div class="work-ph ph-rect">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">SNS DESIGN</span>
+          <p class="work-name">이마트 중고 장난감</p>
+          <p class="work-sub">기부 뉴스레터 & SNS 디자인</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="content">
+      <div class="work-ph ph-rect">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">SNS DESIGN</span>
+          <p class="work-name">이니스프리 이벤트</p>
+          <p class="work-sub">SNS 이벤트 디자인 [팀]</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item c4" data-category="content">
+      <div class="work-ph ph-rect">작업물 이미지</div>
+      <div class="work-overlay">
+        <div class="work-info">
+          <span class="work-tag">POSTER DESIGN</span>
+          <p class="work-name">초고령화 도시 [공익]</p>
+          <p class="work-sub">공익 포스터 디자인</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about reveal">
+  <div>
+    <p class="section-label">SKILLS</p>
+    <div class="about-skills">
+      <div class="skill-chip"><div class="skill-dot"></div>Brand Identity</div>
+      <div class="skill-chip"><div class="skill-dot"></div>Package Design</div>
+      <div class="skill-chip"><div class="skill-dot"></div>UX/UI Design</div>
+      <div class="skill-chip"><div class="skill-dot"></div>Editorial Design</div>
+      <div class="skill-chip"><div class="skill-dot"></div>Illustration</div>
+      <div class="skill-chip"><div class="skill-dot"></div>Motion / Video</div>
+      <div class="skill-chip"><div class="skill-dot"></div>Art Direction</div>
+      <div class="skill-chip"><div class="skill-dot"></div>Brand Planning</div>
+    </div>
+  </div>
+  <div class="about-text">
+    <h2 class="about-heading">BRAND<br>BLOOMS<br>HERE.</h2>
+    <p class="about-body">
+      사람의 경험에서<br>
+      브랜드의 가치를 피워내는<br>
+      디자이너 이영주입니다.<br><br>
+      대진대학교 시각디자인 졸업 (4.39/4.5)<br>
+      브랜딩 · 패키지 · UX/UI · 에디토리얼<br>
+      다양한 분야에서 작업합니다.
+    </p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner reveal">
+    <p class="contact-label">// GET IN TOUCH</p>
+    <h2 class="contact-heading">WORK<br>TOGETHER.</h2>
+    <a href="mailto:light00ju@gmail.com" class="contact-email">light00ju@gmail.com</a>
+    <div class="contact-socials">
+      <a href="https://daisyportfolio.creatorlink.net" target="_blank" class="social-btn">PORTFOLIO</a>
+      <a href="#" class="social-btn">INSTAGRAM</a>
+      <a href="#" class="social-btn">BEHANCE</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">LEE YOUNGJU — BRAND DESIGNER</span>
+  <span style="color:var(--bg);opacity:.3">© 2026 LEE YOUNGJU. ALL RIGHTS RESERVED.</span>
+</footer>
+
+<script>
+  // ─── THEME ───
+  const html = document.documentElement;
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  html.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    // update fg swatch
+    document.getElementById('fgSwatch').style.background = next === 'dark' ? '#F5F4F0' : '#0A0A0A';
+    syncTheme();
+  });
+
+  // ─── CURSOR ───
+  const cursorEl = document.getElementById('cursor');
+  const dotEl    = document.getElementById('cursorDot');
+  let mx = 0, my = 0, cdx = 0, cdy = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    document.getElementById('heroCoords').textContent =
+      'X:' + String(Math.round(e.clientX)).padStart(3,'0') +
+      ' Y:' + String(Math.round(e.clientY)).padStart(3,'0');
+  });
+  (function loop() {
+    cdx += (mx - cdx) * 0.15;
+    cdy += (my - cdy) * 0.15;
+    cursorEl.style.left = mx + 'px'; cursorEl.style.top = my + 'px';
+    dotEl.style.left    = cdx + 'px'; dotEl.style.top   = cdy + 'px';
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a, button, .work-item, .color-swatch').forEach(el => {
+    el.addEventListener('mouseenter', () => cursorEl.style.transform = 'translate(-50%,-50%) scale(2.2)');
+    el.addEventListener('mouseleave', () => cursorEl.style.transform = 'translate(-50%,-50%) scale(1)');
+  });
+
+  // ─── PIXEL CANVAS ───
+  const cvs  = document.getElementById('heroCanvas');
+  const ctx  = cvs.getContext('2d');
+
+  const CELL         = 18;
+  const HOVER_RADIUS = 80;
+  const ACCENT_COLOR = '#FF3B00';
+
+  let W, H, COLS, ROWS;
+  let cells = [];
+
+  let mouseX = -9999, mouseY = -9999;
+  let isPainting = false;
+  let activeColor = '#FF3B00';
+  let brushSize   = 1;
+  let artVisible = true;  // pixel art animations shown until first paint
+  let artFade = 1.0;      // 1 → 0 when user starts painting
+
+  function isDark() { return html.getAttribute('data-theme') === 'dark'; }
+
+  // ─── CATEGORY PIXEL ART PATTERNS ───
+  // Each pattern: 0 = empty, 1 = filled. Approx 10×10 cells.
+  const ART_DEFS = [
+    {
+      label: 'BRANDING',
+      color: '#FF3B00',
+      pattern: [
+        [0,0,0,1,1,1,1,0,0,0],
+        [0,0,1,1,0,0,1,1,0,0],
+        [0,1,1,0,0,0,0,1,1,0],
+        [1,1,0,0,0,0,0,0,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,0,0,0,0,0,0,1,1],
+        [0,1,1,0,0,0,0,1,1,0],
+        [0,0,1,1,0,0,1,1,0,0],
+        [0,0,0,1,1,1,1,0,0,0],
+      ],
+    },
+    {
+      label: 'UX/UI',
+      color: '#5547FF',
+      pattern: [
+        [0,1,1,1,1,1,1,1,1,0],
+        [1,1,0,0,0,0,0,0,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,0,0,0,0,0,0,1,1],
+        [0,1,1,1,0,0,1,1,1,0],
+        [0,0,0,1,1,1,1,0,0,0],
+      ],
+    },
+    {
+      label: 'EDITORIAL',
+      color: '#FF3B00',
+      pattern: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1],
+        [0,0,0,0,0,0,0,0,0,0],
+      ],
+    },
+    {
+      label: 'CONTENT',
+      color: '#5547FF',
+      pattern: [
+        [0,1,1,1,1,1,1,1,1,0],
+        [1,1,0,0,0,0,0,0,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,0,0,0,1,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,1,1,1,0,0,0,1],
+        [1,1,0,0,0,0,0,0,1,1],
+        [0,1,1,1,1,1,1,1,1,0],
+        [0,0,0,1,1,0,0,0,0,0],
+        [0,0,1,1,0,0,0,0,0,0],
+      ],
+    },
+  ];
+
+  // Animation state for each art item
+  let artItems = []; // set in initCanvas
+
+  // ─── CANVAS INIT ───
+  function initCanvas() {
+    const section = document.getElementById('heroSection');
+    W = section.offsetWidth;
+    H = section.offsetHeight;
+    cvs.width = W;
+    cvs.height = H;
+    COLS = Math.ceil(W / CELL);
+    ROWS = Math.ceil(H / CELL);
+    cells = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        cells.push({
+          r, c,
+          x: c * CELL, y: r * CELL,
+          painted: false, color: null,
+          glow: 0,
+          base:  Math.random() * 0.055 + 0.015,
+          phase: Math.random() * Math.PI * 2,
+          speed: Math.random() * 0.3 + 0.15,
+        });
+      }
+    }
+
+    // Position the 4 category arts in each quadrant
+    const CYCLE = 400; // frames per full fade-in/hold/fade-out/idle cycle
+    artItems = ART_DEFS.map((def, i) => {
+      const pad = 6;
+      const ph = def.pattern.length;
+      const pw = def.pattern[0].length;
+      // spread: top-left, top-right, bottom-left, bottom-right
+      const positions = [
+        { offR: pad,             offC: pad },
+        { offR: pad,             offC: COLS - pw - pad },
+        { offR: ROWS - ph - pad, offC: pad },
+        { offR: ROWS - ph - pad, offC: COLS - pw - pad },
+      ];
+      return {
+        ...def,
+        offR: positions[i].offR,
+        offC: positions[i].offC,
+        frame: Math.floor(i * CYCLE / 4), // stagger start times
+      };
+    });
+  }
+
+  function paintAt(px, py) {
+    const cc = Math.floor(px / CELL);
+    const cr = Math.floor(py / CELL);
+    const half = Math.floor(brushSize / 2);
+    for (let dr = 0; dr < brushSize; dr++) {
+      for (let dc = 0; dc < brushSize; dc++) {
+        const r = cr + dr - half;
+        const c = cc + dc - half;
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+        const cell = cells[r * COLS + c];
+        if (!cell) continue;
+        if (activeColor === 'ERASE') {
+          cell.painted = false; cell.color = null;
+        } else {
+          const col = activeColor === 'FG'
+            ? (isDark() ? '#F5F4F0' : '#0A0A0A')
+            : activeColor;
+          cell.painted = true; cell.color = col;
+        }
+      }
+    }
+  }
+
+  // ─── DRAW LOOP ───
+  let t = 0;
+  // Art animation constants
+  const ART_RISE  = 60;   // fade-in frames
+  const ART_HOLD  = 150;  // visible frames
+  const ART_FALL  = 60;   // fade-out frames
+  const ART_IDLE  = 130;  // invisible frames
+  const ART_CYCLE = ART_RISE + ART_HOLD + ART_FALL + ART_IDLE; // 400
+
+  function artAlpha(frame) {
+    const phase = frame % ART_CYCLE;
+    if (phase < ART_RISE)                          return phase / ART_RISE;
+    if (phase < ART_RISE + ART_HOLD)              return 1.0;
+    if (phase < ART_RISE + ART_HOLD + ART_FALL)   return 1.0 - (phase - ART_RISE - ART_HOLD) / ART_FALL;
+    return 0;
+  }
+
+  function draw() {
+    requestAnimationFrame(draw);
+    t += 0.016;
+    ctx.clearRect(0, 0, W, H);
+
+    const fgRGB = isDark() ? '245,244,240' : '10,10,10';
+    const sz    = CELL - 2;
+
+    // 1. Background cells (breathing dots)
+    for (const p of cells) {
+      if (p.painted) continue; // painted cells drawn later on top
+      const dx = p.x + CELL/2 - mouseX;
+      const dy = p.y + CELL/2 - mouseY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const hoverTarget = dist < HOVER_RADIUS ? (1 - dist / HOVER_RADIUS) * 0.75 : 0;
+      p.glow += (hoverTarget - p.glow) * 0.12;
+
+      if (p.glow > 0.06) {
+        ctx.fillStyle   = ACCENT_COLOR;
+        ctx.globalAlpha = p.glow * 0.55;
+        ctx.fillRect(p.x, p.y, sz, sz);
+      } else {
+        const breath = Math.sin(t * p.speed + p.phase) * 0.01 + p.base;
+        ctx.fillStyle   = `rgb(${fgRGB})`;
+        ctx.globalAlpha = breath;
+        ctx.fillRect(p.x, p.y, sz, sz);
+      }
+    }
+
+    // 2. Animated category pixel arts (disappear on first paint)
+    if (artFade > 0) {
+      if (!artVisible) artFade = Math.max(0, artFade - 0.05); // fade out over ~20 frames
+      for (const art of artItems) {
+        art.frame++;
+        const alpha = artAlpha(art.frame) * artFade;
+        if (alpha <= 0.01) continue;
+        const pat = art.pattern;
+        for (let mr = 0; mr < pat.length; mr++) {
+          for (let mc = 0; mc < pat[mr].length; mc++) {
+            if (!pat[mr][mc]) continue;
+            const gr = art.offR + mr;
+            const gc = art.offC + mc;
+            if (gr < 0 || gr >= ROWS || gc < 0 || gc >= COLS) continue;
+            const cell = cells[gr * COLS + gc];
+            if (!cell || cell.painted) continue;
+            ctx.fillStyle   = art.color;
+            ctx.globalAlpha = alpha * 0.75;
+            ctx.fillRect(cell.x, cell.y, sz, sz);
+          }
+        }
+      }
+    }
+
+    // 3. User-painted cells (always on top)
+    for (const p of cells) {
+      if (!p.painted) continue;
+      ctx.fillStyle   = p.color;
+      ctx.globalAlpha = 1;
+      ctx.fillRect(p.x, p.y, sz, sz);
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  function syncTheme() {
+    document.getElementById('fgSwatch').style.background = isDark() ? '#F5F4F0' : '#0A0A0A';
+  }
+
+  // ─── EVENTS ───
+  cvs.addEventListener('mousedown', e => {
+    isPainting = true;
+    cursorEl.classList.add('painting');
+    // 첫 클릭 시: 픽셀 아트 애니메이션 fade out, 초대 문구 숨김
+    artVisible = false;
+    const invite = document.getElementById('canvasInvite');
+    if (invite) invite.classList.add('hidden');
+    const rect = cvs.getBoundingClientRect();
+    paintAt(e.clientX - rect.left, e.clientY - rect.top);
+  });
+  cvs.addEventListener('mousemove', e => {
+    const rect = cvs.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+    if (isPainting) paintAt(mouseX, mouseY);
+  });
+  document.addEventListener('mouseup', () => {
+    isPainting = false;
+    cursorEl.classList.remove('painting');
+  });
+  cvs.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+  // ─── COLOR SWATCHES ───
+  document.querySelectorAll('.color-swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      activeColor = sw.dataset.color;
+    });
+  });
+
+  // ─── BRUSH SIZE ───
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      brushSize = parseInt(btn.dataset.size);
+    });
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    cells.forEach(c => { c.painted = false; c.color = null; });
+  });
+
+  // random flashes
+  setInterval(() => {
+    if (!cells.length) return;
+    const p = cells[Math.floor(Math.random() * cells.length)];
+    const orig = p.base;
+    p.base = 0.25;
+    setTimeout(() => { p.base = orig; }, 120);
+  }, 500);
+
+  // ─── COUNT UP ───
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    let cur = 0;
+    const step = Math.max(1, Math.ceil(target / 35));
+    const timer = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = String(cur).padStart(String(target).length, '0');
+      if (cur >= target) { el.textContent = target + '+'; clearInterval(timer); }
+    }, 50);
+  });
+
+  // ─── WORK FILTER ───
+  const grid = document.getElementById('workGrid');
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      const items  = grid.querySelectorAll('.work-item');
+      if (filter === 'all') {
+        grid.classList.remove('filtered');
+        items.forEach(it => it.classList.remove('hidden'));
+      } else {
+        grid.classList.add('filtered');
+        items.forEach(it => {
+          it.classList.toggle('hidden', it.dataset.category !== filter);
+        });
+      }
+    });
+  });
+
+  // ─── SCROLL REVEAL ───
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  window.addEventListener('resize', initCanvas);
+  syncTheme();
+  initCanvas();
+  draw();
+</script>
+</body>
+</html>
